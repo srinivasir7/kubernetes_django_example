@@ -1,0 +1,49 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: django-weather
+  labels:
+    app: django-weather
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      pod: django-weather
+  strategy:
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 1
+    type: RollingUpdate  
+  template:
+    metadata:
+      labels:
+        pod: django-weather
+    spec:
+      containers:
+      - name: django-weather
+        image: srini/k8_django_weather:v1
+        ports:
+        - containerPort: 8000
+          name: django-weather-port
+          protocol: TCP
+        livenessProbe:
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          tcpSocket:
+            port: django-weather-port	  
+        readinessProbe:
+          failureThreshold: 2
+          httpGet:
+            path: /weather/health-check/
+            port: django-weather-port
+          initialDelaySeconds: 35
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 10
+        resources:
+          limits:
+            cpu: "0.20"
+            memory: 500Mi
+          requests:
+            cpu: "0.15"
+            memory: 300Mi
