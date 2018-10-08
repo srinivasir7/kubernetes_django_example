@@ -1,1 +1,1 @@
-# kubernetes_django_example
+# Django sample project with support for containerized deployment
